@@ -41,10 +41,11 @@ SessionLocal = async_sessionmaker(
 
 
 async def get_session() -> AsyncGenerator[AsyncSession]:
+    session = SessionLocal()
     try:
-        yield SessionLocal()
+        yield session
     except Exception as e:
-        await SessionLocal.rollback()
+        await session.rollback()
         raise e
     finally:
-        await SessionLocal.close()
+        await session.close()

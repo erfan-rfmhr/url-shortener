@@ -14,7 +14,7 @@ class Link(SQLModel, table=True):
         ..., unique=True, index=True, description="Short code for the URL"
     )
     created_at: datetime = Field(
-        default_factory=lambda: datetime.now(datetime.UTC),
+        default_factory=lambda: datetime.now(),
         description="When the link was created",
     )
 
