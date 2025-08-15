@@ -11,7 +11,7 @@ class ShortenedUrl(SQLModel):
 
 
 class UrlStats(SQLModel):
-    short_code: str
+    short_url: str
     target_url: str
-    visit_count: int
+    visits_count: int
     created_at: str

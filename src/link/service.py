@@ -10,7 +10,7 @@ from .repo import LinkRepo, VisitRepo
 
 
 class ShortenerService:
-    default_domain = settings.DEFAULT_DOMAIN
+    DEFAULT_DOMAIN = settings.DEFAULT_DOMAIN
     BASE62 = string.ascii_letters + string.digits
     length = settings.SHORT_URL_LENGTH
 
@@ -23,7 +23,11 @@ class ShortenerService:
         code = await self.generate_short_code(url)
         if session:
             await self.perform_create(url, code, session)
-        return f"{self.default_domain}/{code}"
+        short_url = await self.get_short_url(code)
+        return short_url
+
+    async def get_short_url(self, short_code: str) -> str:
+        return f"{self.DEFAULT_DOMAIN}/{short_code}"
 
     async def perform_create(self, url: str, code: str, session: AsyncSession) -> Link:
         link = await self.repo.create(url, code, session)
@@ -61,6 +65,12 @@ class ShortenerService:
         self, link_id: int, session: AsyncSession, commit=True
     ) -> Link:
         link = await self.repo.update_visits_count(link_id, session, commit)
+        return link
+
+    async def get_link_by_code(
+        self, short_code: str, session: AsyncSession
+    ) -> Link | None:
+        link = await self.repo.get_by_code(short_code, session)
         return link
 
 

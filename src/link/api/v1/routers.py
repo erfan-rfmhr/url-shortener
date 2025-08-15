@@ -32,18 +32,20 @@ async def create_short_url(
 
 @router.get("/stats/{short_code}", response_model=UrlStats)
 async def get_url_stats(short_code: str, session: AsyncSession = Depends(get_session)):
-    stats = await SHORTENER_SERVICE.get_url_stats(short_code, session)
+    link = await SHORTENER_SERVICE.get_link_by_code(short_code, session)
 
-    if not stats:
+    if not link:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Short URL not found"
         )
 
+    short_url = await SHORTENER_SERVICE.get_short_url(link.code)
+
     response_data = UrlStats(
-        short_code=stats["code"],
-        target_url=stats["target"],
-        visit_count=stats["visit_count"],
-        created_at=stats["created_at"].isoformat(),
+        short_url=short_url,
+        target_url=link.target,
+        visits_count=link.visits_count,
+        created_at=link.created_at.isoformat(),
     )
 
     return JSONResponse(

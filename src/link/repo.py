@@ -59,11 +59,21 @@ class LinkRepo:
         query = select(Link).where(Link.id == link_id)
         result = await session.execute(query)
         link = result.scalar_one()
+        if link.visits_count is None:
+            link.visits_count = 0
         link.visits_count += 1
         session.add(link)
         if commit:
             await session.commit()
         return link
+
+    @classmethod
+    async def get_constant_visits_count(
+        cls, link_id: int, session: AsyncSession
+    ) -> int | None:
+        query = select(Link.visits_count).where(Link.id == link_id)
+        result = await session.execute(query)
+        return result.scalar_one_or_none()
 
 
 class VisitRepo:
