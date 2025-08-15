@@ -51,6 +51,12 @@ class ShortenerService:
             return None
         return link
 
+    async def get_url_stats(
+        self, short_code: str, session: AsyncSession
+    ) -> dict | None:
+        stats = await self.repo.get_stats_by_code(short_code, session)
+        return stats
+
 
 class VisitService:
     def __init__(self, repo=VisitRepo):
