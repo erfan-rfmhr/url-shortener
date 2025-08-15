@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.core import get_session
-from src.link.service import SHORTENER_SERVICE
+from src.link.service import SHORTENER_SERVICE, VISIT_SERVICE
 
 from .link.api.v1.routers import router as link_v1_router
 from .logger import log_request_info
@@ -33,14 +33,15 @@ api_router.include_router(v1_router)
 async def redirect_to_url(
     request: Request, short_code: str, session: AsyncSession = Depends(get_session)
 ):
-    target_url = await SHORTENER_SERVICE.get_target_url(short_code, session)
-    if not target_url:
+    link = await SHORTENER_SERVICE.get_target(short_code, session)
+    if not link:
         return JSONResponse(
             content={"detail": "Link not found"},
             status_code=status.HTTP_404_NOT_FOUND,
         )
+    await VISIT_SERVICE.create_visit(link.id, session)
     return RedirectResponse(
-        url=target_url, status_code=status.HTTP_307_TEMPORARY_REDIRECT
+        url=link.target, status_code=status.HTTP_307_TEMPORARY_REDIRECT
     )
 
 

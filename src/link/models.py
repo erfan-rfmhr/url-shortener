@@ -31,7 +31,7 @@ class Visit(SQLModel, table=True):
     )
     utm: str | None = Field(default=None, description="UTM parameters for tracking")
     visited_at: datetime = Field(
-        default_factory=lambda: datetime.now(datetime.UTC),
+        default_factory=lambda: datetime.now(),
         description="When the visit occurred",
     )
 

@@ -4,9 +4,9 @@ import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config.conf import settings
-from src.link.models import Link
+from src.link.models import Link, Visit
 
-from .repo import LinkRepo
+from .repo import LinkRepo, VisitRepo
 
 
 class ShortenerService:
@@ -45,16 +45,22 @@ class ShortenerService:
             encoded = self.BASE62[rem] + encoded
         return encoded
 
-    async def get_target_url(
-        self, short_code: str, session: AsyncSession
-    ) -> str | None:
+    async def get_target(self, short_code: str, session: AsyncSession) -> Link | None:
         link = await self.repo.get_by_code(short_code, session)
         if not link:
             return None
-        return link.target
+        return link
 
-    async def get_url_stats(self, short_code: str):
-        pass
+
+class VisitService:
+    def __init__(self, repo=VisitRepo):
+        self.repo = repo
+
+    async def create_visit(self, link_id: int, session: AsyncSession) -> Visit:
+        visit = await self.repo.create(link_id, session)
+        return visit
 
 
 SHORTENER_SERVICE = ShortenerService()
+
+VISIT_SERVICE = VisitService()
