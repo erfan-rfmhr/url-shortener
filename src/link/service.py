@@ -57,13 +57,21 @@ class ShortenerService:
         stats = await self.repo.get_stats_by_code(short_code, session)
         return stats
 
+    async def update_visits_count(
+        self, link_id: int, session: AsyncSession, commit=True
+    ) -> Link:
+        link = await self.repo.update_visits_count(link_id, session, commit)
+        return link
+
 
 class VisitService:
     def __init__(self, repo=VisitRepo):
         self.repo = repo
 
-    async def create_visit(self, link_id: int, session: AsyncSession) -> Visit:
-        visit = await self.repo.create(link_id, session)
+    async def create_visit(
+        self, link_id: int, session: AsyncSession, commit=True
+    ) -> Visit:
+        visit = await self.repo.create(link_id, session, commit)
         return visit
 
 

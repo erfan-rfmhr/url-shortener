@@ -6,7 +6,7 @@ from src.database.core import get_session
 from src.link.service import SHORTENER_SERVICE, VISIT_SERVICE
 
 from .link.api.v1.routers import router as link_v1_router
-from .logger import log_request_info
+from .logger import log_request_info, logger
 
 router = APIRouter()
 api_router = APIRouter(prefix="/api")
@@ -39,7 +39,15 @@ async def redirect_to_url(
             content={"detail": "Link not found"},
             status_code=status.HTTP_404_NOT_FOUND,
         )
-    await VISIT_SERVICE.create_visit(link.id, session)
+    try:
+        await VISIT_SERVICE.create_visit(link.id, session, commit=False)
+        await SHORTENER_SERVICE.update_visits_count(link.id, session, commit=False)
+    except Exception as e:
+        logger.error(
+            msg=f"Error updating visits: {link.id}",
+            exc_info=e,
+        )
+    await session.commit()
     return RedirectResponse(
         url=link.target, status_code=status.HTTP_307_TEMPORARY_REDIRECT
     )

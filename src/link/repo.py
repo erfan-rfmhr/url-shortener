@@ -52,6 +52,19 @@ class LinkRepo:
             "visit_count": row.visit_count,
         }
 
+    @classmethod
+    async def update_visits_count(
+        cls, link_id: int, session: AsyncSession, commit=True
+    ) -> Link:
+        query = select(Link).where(Link.id == link_id)
+        result = await session.execute(query)
+        link = result.scalar_one()
+        link.visits_count += 1
+        session.add(link)
+        if commit:
+            await session.commit()
+        return link
+
 
 class VisitRepo:
     @classmethod

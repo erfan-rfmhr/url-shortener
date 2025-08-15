@@ -17,6 +17,9 @@ class Link(SQLModel, table=True):
         default_factory=lambda: datetime.now(),
         description="When the link was created",
     )
+    visits_count: int = Field(
+        default=0, nullable=True, description="Number of visits to the link"
+    )
 
     # Relationship to visits
     visits: list["Visit"] = Relationship(back_populates="link")
