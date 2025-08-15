@@ -6,6 +6,7 @@ from src.database.core import get_session
 from src.link.service import SHORTENER_SERVICE
 
 from .link.api.v1.routers import router as link_v1_router
+from .logger import log_request_info
 
 router = APIRouter()
 api_router = APIRouter(prefix="/api")
@@ -28,8 +29,9 @@ api_router.include_router(v1_router)
         },
     },
 )
+@log_request_info
 async def redirect_to_url(
-    short_code: str, request: Request, session: AsyncSession = Depends(get_session)
+    request: Request, short_code: str, session: AsyncSession = Depends(get_session)
 ):
     target_url = await SHORTENER_SERVICE.get_target_url(short_code, session)
     if not target_url:
