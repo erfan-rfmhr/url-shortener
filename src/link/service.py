@@ -63,9 +63,8 @@ class ShortenerService:
 
     async def update_visits_count(
         self, link_id: int, session: AsyncSession, commit=True
-    ) -> Link:
-        link = await self.repo.update_visits_count(link_id, session, commit)
-        return link
+    ):
+        await self.repo.update_visits_count(link_id, session, commit)
 
     async def get_link_by_code(
         self, short_code: str, session: AsyncSession

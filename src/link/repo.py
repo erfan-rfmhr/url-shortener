@@ -1,4 +1,4 @@
-from sqlalchemy import func
+from sqlalchemy import func, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
@@ -55,17 +55,18 @@ class LinkRepo:
     @classmethod
     async def update_visits_count(
         cls, link_id: int, session: AsyncSession, commit=True
-    ) -> Link:
-        query = select(Link).where(Link.id == link_id)
-        result = await session.execute(query)
-        link = result.scalar_one()
-        if link.visits_count is None:
-            link.visits_count = 0
-        link.visits_count += 1
-        session.add(link)
+    ):
+        stmt = (
+            update(Link)
+            .where(Link.id == link_id)
+            .values(visits_count=func.coalesce(Link.visits_count, 0) + 1)
+            .returning(Link.visits_count)
+        )
+
+        await session.execute(stmt)
+
         if commit:
             await session.commit()
-        return link
 
     @classmethod
     async def get_constant_visits_count(
