@@ -6,7 +6,7 @@ Let's dive into scalable solutions.
 
 ### Background tasks
 
-FastAPI BackgroundTasks enqueue logs and remove I/O cost from the path.
+FastAPI BackgroundTasks enqueue logs and remove I/O cost from the path, as it doesn't block the main thread.
 
 ### Async workers
 
