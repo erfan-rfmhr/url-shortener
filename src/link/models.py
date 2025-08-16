@@ -22,7 +22,9 @@ class Link(SQLModel, table=True):
     )
 
     # Relationship to visits
-    visits: list["Visit"] = Relationship(back_populates="link")
+    visits: list["Visit"] = Relationship(
+        back_populates="link", sa_relationship_kwargs={"lazy": "joined"}
+    )
 
 
 class Visit(SQLModel, table=True):
@@ -39,4 +41,6 @@ class Visit(SQLModel, table=True):
     )
 
     # Relationship to link
-    link: Link = Relationship(back_populates="visits")
+    link: Link = Relationship(
+        back_populates="visits", sa_relationship_kwargs={"lazy": "joined"}
+    )

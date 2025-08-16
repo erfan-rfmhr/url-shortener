@@ -20,7 +20,7 @@ class LinkRepo:
     @classmethod
     async def get_by_code(cls, code: str, session: AsyncSession) -> Link | None:
         result = await session.execute(select(Link).where(Link.code == code))
-        return result.scalar_one_or_none()
+        return result.unique().scalar_one_or_none()
 
     @classmethod
     async def get_stats_by_code(cls, code: str, session: AsyncSession) -> dict | None:

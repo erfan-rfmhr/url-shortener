@@ -69,7 +69,7 @@ A fast and scalable URL shortener built with FastAPI and PostgreSQL. This applic
 
 5. **Start the application**:
    ```bash
-   python src/main.py
+   fastapi run src/main.py
    ```
 
 ### API Usage

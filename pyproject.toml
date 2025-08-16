@@ -16,7 +16,11 @@ dependencies = [
 
 [dependency-groups]
 test = [
+    "aiosqlite>=0.21.0",
+    "httpx>=0.28.1",
     "locust>=2.38.1",
+    "pytest>=8.4.1",
+    "pytest-asyncio>=1.1.0",
 ]
 dev = [
     "ruff>=0.3.0",
@@ -76,6 +80,9 @@ ignore = [
     "PLR0913", # too many arguments to function call
     "PLR0912", # too many branches
     "PLR0915", # too many statements
+    "S101",
+    "PLR2004",
+    "B017",
 ]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
@@ -97,6 +104,7 @@ known-first-party = ["url_shortener"]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
+"tests/*.py" = ["S101", "PLR2004"]
 
 [tool.ruff.format]
 # Like Black, use double quotes for strings.

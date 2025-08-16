@@ -1,3 +1,0 @@
-"""
-Load testing script
-"""
