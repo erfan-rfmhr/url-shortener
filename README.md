@@ -2,6 +2,14 @@
 
 A fast and scalable URL shortener built with FastAPI and PostgreSQL. This application provides a simple API to shorten long URLs and track visit statistics.
 
+## Table of Contents
+
+- [Features](#features)
+- [Configuration](#configuration)
+- [Development](#development)
+- [How to Use](#how-to-use)
+- [Database Design](#database-design)
+
 ## Features
 
 - **URL Shortening**: Convert long URLs into short, memorable codes
@@ -11,13 +19,73 @@ A fast and scalable URL shortener built with FastAPI and PostgreSQL. This applic
 - **Database Migrations**: Alembic-based database schema management
 - **Load Testing**: Built-in Locust configuration for performance testing
 
+## Configuration
+
+### Environment Variables
+
+Create a `.env` file in the project root:
+
+```env
+# Database Configuration
+DATABASE_URI=postgresql+asyncpg://postgres:postgres@localhost:5432/shortener
+DATABASE_ENGINE_POOL_TIMEOUT=30
+DATABASE_ENGINE_POOL_RECYCLE=3600
+DATABASE_ENGINE_POOL_SIZE=10
+DATABASE_ENGINE_MAX_OVERFLOW=20
+DATABASE_ENGINE_POOL_PING=true
+
+# Application Configuration
+DEFAULT_DOMAIN=http://localhost:8000
+SHORT_URL_LENGTH=6
+```
+
+### Configuration Options
+
+- **DATABASE_URI**: PostgreSQL connection string
+- **DEFAULT_DOMAIN**: Base domain for shortened URLs
+- **SHORT_URL_LENGTH**: Length of generated short codes
+- **Pool settings**: Database connection pool configuration
+
+## Development
+
+### Code Quality
+
+The project uses **Ruff** for linting and formatting:
+
+```bash
+# Install dev dependencies
+uv sync --group dev
+
+# Run linter
+ruff check src/
+
+# Auto-fix issues
+ruff check --fix src/
+
+# Format code
+ruff format src/
+```
+
+### Pre-commit Hooks
+
+```bash
+# Install pre-commit
+uv sync --group dev
+
+# Set up hooks
+pre-commit install
+
+# Run hooks manually
+pre-commit run --all-files
+```
+
 ## How to Use
 
 ### Running with Docker
 
 1. **Clone the repository**:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/erfan-rfmhr/url-shortener.git
    cd url-shortener
    ```
 
@@ -40,14 +108,7 @@ A fast and scalable URL shortener built with FastAPI and PostgreSQL. This applic
 
 1. **Install PostgreSQL** and create a database named `shortener`
 
-2. **Set up environment variables** (create a `.env` file):
-   ```env
-   DATABASE_URI=postgresql+asyncpg://postgres:postgres@localhost:5432/shortener
-   DEFAULT_DOMAIN=http://localhost:8000
-   SHORT_URL_LENGTH=6
-   ```
-
-3. **Install dependencies using uv**:
+2. **Install dependencies using uv**:
    ```bash
    # Install uv
    pip install uv
@@ -62,12 +123,12 @@ A fast and scalable URL shortener built with FastAPI and PostgreSQL. This applic
    uv sync --group test
    ```
 
-4. **Run database migrations**:
+3. **Run database migrations**:
    ```bash
    python src/migrate.py upgrade head
    ```
 
-5. **Start the application**:
+4. **Start the application**:
    ```bash
    fastapi run src/main.py
    ```
@@ -218,7 +279,12 @@ url-shortener/
 │   └── load_test.py             # Locust load testing
 ├── docker/                       # Docker configuration
 │   └── docker-compose.yml       # Docker services definition
-└── pyproject.toml               # Project dependencies and configuration
+│   └── Dockerfile               # Dockerfile for building the application
+├── .env.example             # Environment variables example
+├── logger.py                # Logging configuration and decorators
+├── migrate.py               # Migration script wrapper
+├── routers.py               # Main router configuration
+├── main.py                  # FastAPI application entry point
 ```
 
 ### Application Architecture
@@ -259,8 +325,8 @@ The application follows a **layered architecture** pattern:
 └── /api/                  # API routes
     └── /v1/               # Version 1 API
         └── /link/         # Link operations
-            ├── /shorten   # POST: Create short URL
-            └── /stats/{code} # GET: Get URL statistics
+            ├── routers.py   # Route handlers
+            └── schemas.py   # Pydantic models for API
 ```
 
 #### Service Dependencies
@@ -344,113 +410,6 @@ The project includes load testing capabilities using Locust.
    http://localhost:8089
    ```
 
-#### Load Test Configuration
-
-The load test simulates realistic user behavior:
-
-- **URL Creation**: Users create shortened URLs
-- **URL Access**: Users visit shortened URLs (higher frequency)
-- **Statistics**: Users check URL statistics
-- **Realistic delays**: Includes think time between requests
-
-#### Expected Performance
-
-With proper database indexing and connection pooling:
-
-- **URL Creation**: ~100-500 requests/second
-- **URL Redirects**: ~1000-2000 requests/second
-- **Statistics API**: ~500-1000 requests/second
-
 ### Unit Testing
 
-To add unit tests, create test files in the `test/` directory:
-
-```bash
-# Install pytest
-uv add pytest pytest-asyncio httpx --group test
-
-# Run tests
-pytest test/
-```
-
-Example test structure:
-```python
-# test/test_shortener.py
-import pytest
-from fastapi.testclient import TestClient
-from src.main import app
-
-client = TestClient(app)
-
-def test_create_short_url():
-    response = client.post(
-        "/api/v1/link/shorten",
-        json={"target_url": "https://example.com"}
-    )
-    assert response.status_code == 201
-    assert "shortened_url" in response.json()
-```
-
-## Configuration
-
-### Environment Variables
-
-Create a `.env` file in the project root:
-
-```env
-# Database Configuration
-DATABASE_URI=postgresql+asyncpg://postgres:postgres@localhost:5432/shortener
-DATABASE_ENGINE_POOL_TIMEOUT=30
-DATABASE_ENGINE_POOL_RECYCLE=3600
-DATABASE_ENGINE_POOL_SIZE=10
-DATABASE_ENGINE_MAX_OVERFLOW=20
-DATABASE_ENGINE_POOL_PING=true
-
-# Application Configuration
-DEFAULT_DOMAIN=http://localhost:8000
-SHORT_URL_LENGTH=6
-```
-
-### Configuration Options
-
-- **DATABASE_URI**: PostgreSQL connection string
-- **DEFAULT_DOMAIN**: Base domain for shortened URLs
-- **SHORT_URL_LENGTH**: Length of generated short codes
-- **Pool settings**: Database connection pool configuration
-
-## Development
-
-### Code Quality
-
-The project uses **Ruff** for linting and formatting:
-
-```bash
-# Install dev dependencies
-uv sync --group dev
-
-# Run linter
-ruff check src/
-
-# Auto-fix issues
-ruff check --fix src/
-
-# Format code
-ruff format src/
-```
-
-### Pre-commit Hooks
-
-```bash
-# Install pre-commit
-uv sync --group dev
-
-# Set up hooks
-pre-commit install
-
-# Run hooks manually
-pre-commit run --all-files
-```
-
-## License
-
-This project is open source and available under the [MIT License](LICENSE).
+Test documentation can be found in the [tests](tests) folder.
